@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Cosmic Mind Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- Login Overlay for Admin -->
+    <div id="admin-login-overlay" style="position: fixed; inset: 0; background: var(--color-bg); z-index: 2000; display: flex; justify-content: center; align-items: center;">
+      <div class="glass-panel" style="width: 100%; max-width: 400px;">
+        <div class="logo" style="justify-content: center; margin-bottom: 2rem;"><span>✧</span> ADMIN PANEL</div>
+        <form id="admin-login-form">
+          <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="admin-user" placeholder="admin" required />
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="admin-pass" placeholder="Password@123" required />
+          </div>
+          <div id="admin-error" class="error-msg">Invalid credentials. Use admin / Password@123</div>
+          <button type="submit" style="width: 100%; margin-top: 1rem;">Admin Login</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="admin-layout" id="admin-ui" style="display: none;">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar flex-col">
+        <div class="logo"><span>✧</span> ADMIN APP</div>
+        <nav class="nav-links" style="flex: 1;">
+          <a href="#" class="nav-link active" data-target="admin-dashboard">Dashboard metrics</a>
+          <a href="#" class="nav-link" data-target="admin-reports">Reports & Payments</a>
+          <a href="#" class="nav-link" data-target="admin-content">Content Management</a>
+        </nav>
+        <div style="margin-top: auto;">
+          <p style="color: var(--color-text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Logged in as: Super Admin</p>
+          <button id="admin-logout" class="secondary" style="width: 100%;">Logout</button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="admin-main">
+        <header style="padding: 0 0 1.5rem 0; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <h2>Cosmic Mind Hub Admin</h2>
+        </header>
+
+        <!-- Dashboard View -->
+        <section id="admin-dashboard" class="view active" style="margin-top: 2rem;">
+          <h3 style="margin-bottom: 1.5rem;">Overview Metrics</h3>
+          <div class="grid">
+            <div class="card glass-panel flex space-between align-center">
+              <div>
+                <p style="color: var(--color-text-muted);">Total Users</p>
+                <h2 style="margin: 0; font-size: 2rem; color: var(--color-primary);">1,245</h2>
+              </div>
+              <span style="font-size: 2rem; opacity: 0.5;">👥</span>
+            </div>
+            <div class="card glass-panel flex space-between align-center">
+              <div>
+                <p style="color: var(--color-text-muted);">Total Orders</p>
+                <h2 style="margin: 0; font-size: 2rem; color: var(--color-accent);">842</h2>
+              </div>
+              <span style="font-size: 2rem; opacity: 0.5;">📦</span>
+            </div>
+            <div class="card glass-panel flex space-between align-center">
+              <div>
+                <p style="color: var(--color-text-muted);">Active Plans</p>
+                <h2 style="margin: 0; font-size: 2rem; color: #facc15;">315</h2>
+              </div>
+              <span style="font-size: 2rem; opacity: 0.5;">⭐</span>
+            </div>
+          </div>
+          
+          <h3 style="margin-top: 3rem; margin-bottom: 1.5rem;">Recent Session Requests</h3>
+          <div class="card glass-panel">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Session Type</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Asha P.</td>
+                    <td>Identity Transformation</td>
+                    <td><span class="badge" style="background: rgba(250, 204, 21, 0.1); color: #facc15;">Pending</span></td>
+                    <td>12 Apr 2026</td>
+                    <td><button class="secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Review</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reports & Payments View -->
+        <section id="admin-reports" class="view" style="margin-top: 2rem;">
+          <h3 style="margin-bottom: 1.5rem;">Report Operations</h3>
+          <div class="card glass-panel">
+            <div class="flex gap-1" style="margin-bottom: 1.5rem;">
+              <input type="text" placeholder="Search orders..." style="padding: 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;" />
+              <button class="secondary" style="padding: 0.5rem 1rem;">Filter</button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Payment</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ORD-1049</td>
+                    <td>Ravi K.</td>
+                    <td>Kundali Pro</td>
+                    <td><span class="badge">Paid (Razorpay)</span></td>
+                    <td><button class="secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Resend PDF</button></td>
+                  </tr>
+                  <tr>
+                    <td>ORD-1050</td>
+                    <td>Priya M.</td>
+                    <td>Family Plan</td>
+                    <td><span class="badge" style="background: transparent; border: 1px solid var(--color-silver); color: var(--color-silver);">Failed (Stripe)</span></td>
+                    <td><button class="secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">View Log</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Content Management View -->
+        <section id="admin-content" class="view" style="margin-top: 2rem;">
+          <h3 style="margin-bottom: 1.5rem;">Content & Legal Editor</h3>
+          <div class="card glass-panel">
+            <div class="input-group">
+              <label>Select Page to Edit</label>
+              <select>
+                <option>Privacy Policy</option>
+                <option>Terms & Conditions</option>
+                <option>Refund Policy</option>
+                <option>Disclaimer Config</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Content Body (HTML/Text)</label>
+              <textarea rows="10">We collect information to provide our services. Your astrology data is kept private...</textarea>
+            </div>
+            <div class="flex gap-1">
+              <button>Publish Changes</button>
+              <button class="secondary">Save as Draft</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
+  </body>
+</html>
