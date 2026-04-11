@@ -3,170 +3,551 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin - Cosmic Mind Hub</title>
+    <title>Admin Dashboard - Cosmic Mind Hub</title>
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <!-- Login Overlay for Admin -->
     <div id="admin-login-overlay" style="position: fixed; inset: 0; background: var(--color-bg); z-index: 2000; display: flex; justify-content: center; align-items: center;">
-      <div class="glass-panel" style="width: 100%; max-width: 400px;">
-        <div class="logo" style="justify-content: center; margin-bottom: 2rem;"><span>✧</span> ADMIN PANEL</div>
+      <div class="glass-panel" style="width: 100%; max-width: 400px; padding: 3rem;">
+        <div class="logo" style="justify-content: center; margin-bottom: 2rem; font-size: 1.8rem;">
+          <span>✧</span> ADMIN PORTAL
+        </div>
         <form id="admin-login-form">
           <div class="input-group">
-            <label>Username</label>
+            <label>Username / Email</label>
             <input type="text" id="admin-user" placeholder="admin" required />
           </div>
           <div class="input-group">
             <label>Password</label>
             <input type="password" id="admin-pass" placeholder="Password@123" required />
           </div>
-          <div id="admin-error" class="error-msg">Invalid credentials. Use admin / Password@123</div>
-          <button type="submit" style="width: 100%; margin-top: 1rem;">Admin Login</button>
+          <div id="admin-error" class="error-msg" style="text-align: center; margin-bottom: 1rem;">Invalid credentials.</div>
+          <button type="submit" style="width: 100%;">Sign In</button>
+          <p style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--color-text-muted);">
+            Secure access for authorized personnel only.
+          </p>
         </form>
       </div>
     </div>
 
+    <!-- Main Admin Layout -->
     <div class="admin-layout" id="admin-ui" style="display: none;">
       <!-- Sidebar -->
-      <aside class="admin-sidebar flex-col">
-        <div class="logo"><span>✧</span> ADMIN APP</div>
-        <nav class="nav-links" style="flex: 1;">
-          <a href="#" class="nav-link active" data-target="admin-dashboard">Dashboard metrics</a>
-          <a href="#" class="nav-link" data-target="admin-reports">Reports & Payments</a>
-          <a href="#" class="nav-link" data-target="admin-content">Content Management</a>
+      <aside class="admin-sidebar">
+        <div class="logo" style="margin-bottom: 2rem;"><span>✧</span> COSMIC HUB</div>
+        
+        <nav class="nav-links">
+          <a href="#" class="nav-link active" data-target="view-dashboard">
+            <i data-lucide="layout-dashboard"></i> Dashboard
+          </a>
+          <div style="margin: 1rem 0 0.5rem 1rem; font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">Management</div>
+          <a href="#" class="nav-link" data-target="view-users">
+            <i data-lucide="users"></i> Users
+          </a>
+          <a href="#" class="nav-link" data-target="view-reports">
+            <i data-lucide="file-text"></i> Reports
+          </a>
+          <a href="#" class="nav-link" data-target="view-plans">
+            <i data-lucide="package"></i> Plans & Pricing
+          </a>
+          <a href="#" class="nav-link" data-target="view-sessions">
+            <i data-lucide="calendar"></i> Sessions
+          </a>
+          <a href="#" class="nav-link" data-target="view-payments">
+            <i data-lucide="credit-card"></i> Payments
+          </a>
+          
+          <div style="margin: 1rem 0 0.5rem 1rem; font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">System</div>
+          <a href="#" class="nav-link" data-target="view-cms">
+            <i data-lucide="edit-3"></i> Content (CMS)
+          </a>
+          <a href="#" class="nav-link" data-target="view-settings">
+            <i data-lucide="settings"></i> API Settings
+          </a>
+          <a href="#" class="nav-link" data-target="view-logs">
+            <i data-lucide="terminal"></i> System Logs
+          </a>
         </nav>
-        <div style="margin-top: auto;">
-          <p style="color: var(--color-text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Logged in as: Super Admin</p>
-          <button id="admin-logout" class="secondary" style="width: 100%;">Logout</button>
+
+        <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+          <div class="flex align-center gap-1" style="margin-bottom: 1rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">A</div>
+            <div>
+              <div style="font-size: 0.9rem; font-weight: 600;">Super Admin</div>
+              <div style="font-size: 0.75rem; color: var(--color-text-muted);">anand@cosmic.com</div>
+            </div>
+          </div>
+          <button id="admin-logout" class="secondary" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="log-out" style="width: 16px;"></i> Logout
+          </button>
         </div>
       </aside>
 
       <!-- Main Content Area -->
-      <main class="admin-main">
-        <header style="padding: 0 0 1.5rem 0; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.05);">
-          <h2>Cosmic Mind Hub Admin</h2>
+      <main style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+        <!-- Topbar -->
+        <header class="admin-topbar">
+          <div class="flex align-center gap-1">
+            <h2 id="view-title" style="margin: 0;">Dashboard</h2>
+          </div>
+          <div class="flex align-center gap-2">
+            <div class="search-box" style="position: relative;">
+              <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: var(--color-text-muted);"></i>
+              <input type="text" placeholder="Global search..." style="padding-left: 2.5rem; width: 300px; background: rgba(255,255,255,0.05); border: none;">
+            </div>
+            <button class="btn-icon secondary"><i data-lucide="bell"></i></button>
+          </div>
         </header>
 
-        <!-- Dashboard View -->
-        <section id="admin-dashboard" class="view active" style="margin-top: 2rem;">
-          <h3 style="margin-bottom: 1.5rem;">Overview Metrics</h3>
-          <div class="grid">
-            <div class="card glass-panel flex space-between align-center">
-              <div>
-                <p style="color: var(--color-text-muted);">Total Users</p>
-                <h2 style="margin: 0; font-size: 2rem; color: var(--color-primary);">1,245</h2>
-              </div>
-              <span style="font-size: 2rem; opacity: 0.5;">👥</span>
-            </div>
-            <div class="card glass-panel flex space-between align-center">
-              <div>
-                <p style="color: var(--color-text-muted);">Total Orders</p>
-                <h2 style="margin: 0; font-size: 2rem; color: var(--color-accent);">842</h2>
-              </div>
-              <span style="font-size: 2rem; opacity: 0.5;">📦</span>
-            </div>
-            <div class="card glass-panel flex space-between align-center">
-              <div>
-                <p style="color: var(--color-text-muted);">Active Plans</p>
-                <h2 style="margin: 0; font-size: 2rem; color: #facc15;">315</h2>
-              </div>
-              <span style="font-size: 2rem; opacity: 0.5;">⭐</span>
-            </div>
-          </div>
+        <div class="admin-main">
           
-          <h3 style="margin-top: 3rem; margin-bottom: 1.5rem;">Recent Session Requests</h3>
-          <div class="card glass-panel">
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Session Type</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Asha P.</td>
-                    <td>Identity Transformation</td>
-                    <td><span class="badge" style="background: rgba(250, 204, 21, 0.1); color: #facc15;">Pending</span></td>
-                    <td>12 Apr 2026</td>
-                    <td><button class="secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Review</button></td>
-                  </tr>
-                </tbody>
-              </table>
+          <!-- Dashboard View -->
+          <section id="view-dashboard" class="view active">
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+              <div class="card glass-panel stat-card" style="--stat-color: var(--color-primary);">
+                <p style="color: var(--color-text-muted); font-size: 0.9rem;">Total Users</p>
+                <div class="stat-value">12,450</div>
+                <div class="stat-trend up"><i data-lucide="trending-up"></i> +12.5%</div>
+              </div>
+              <div class="card glass-panel stat-card" style="--stat-color: var(--color-accent);">
+                <p style="color: var(--color-text-muted); font-size: 0.9rem;">Total Orders</p>
+                <div class="stat-value">8,122</div>
+                <div class="stat-trend up"><i data-lucide="trending-up"></i> +8.2%</div>
+              </div>
+              <div class="card glass-panel stat-card" style="--stat-color: var(--color-warning);">
+                <p style="color: var(--color-text-muted); font-size: 0.9rem;">Total Revenue</p>
+                <div class="stat-value">₹14.2L</div>
+                <div class="stat-trend up"><i data-lucide="trending-up"></i> +15.3%</div>
+              </div>
+              <div class="card glass-panel stat-card" style="--stat-color: var(--color-danger);">
+                <p style="color: var(--color-text-muted); font-size: 0.9rem;">Pending Sessions</p>
+                <div class="stat-value">24</div>
+                <div class="stat-trend down"><i data-lucide="trending-down"></i> -2%</div>
+              </div>
             </div>
-          </div>
-        </section>
 
-        <!-- Reports & Payments View -->
-        <section id="admin-reports" class="view" style="margin-top: 2rem;">
-          <h3 style="margin-bottom: 1.5rem;">Report Operations</h3>
-          <div class="card glass-panel">
-            <div class="flex gap-1" style="margin-bottom: 1.5rem;">
-              <input type="text" placeholder="Search orders..." style="padding: 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;" />
-              <button class="secondary" style="padding: 0.5rem 1rem;">Filter</button>
+            <div class="grid" style="grid-template-columns: 2fr 1fr; margin-top: 2rem;">
+              <div class="card glass-panel">
+                <div class="flex space-between align-center" style="margin-bottom: 2rem;">
+                  <h3>Revenue Overview</h3>
+                  <select class="secondary" style="width: auto; padding: 0.4rem 1rem;">
+                    <option>Last 7 Days</option>
+                    <option>Last 30 Days</option>
+                  </select>
+                </div>
+                <!-- Fixed height container for Chart.js to prevent infinite scaling -->
+                <div style="height: 350px; position: relative;">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+              <div class="card glass-panel">
+                <h3>Recent Activity</h3>
+                <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
+                  <div class="flex gap-1">
+                    <div class="badge-info" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><i data-lucide="user-plus" style="width: 16px;"></i></div>
+                    <div>
+                      <div style="font-size: 0.9rem;">New user registered</div>
+                      <div style="font-size: 0.75rem; color: var(--color-text-muted);">2 minutes ago</div>
+                    </div>
+                  </div>
+                  <div class="flex gap-1">
+                    <div class="badge-success" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><i data-lucide="shopping-bag" style="width: 16px;"></i></div>
+                    <div>
+                      <div style="font-size: 0.9rem;">Order ODR-5542 paid</div>
+                      <div style="font-size: 0.75rem; color: var(--color-text-muted);">15 minutes ago</div>
+                    </div>
+                  </div>
+                  <div class="flex gap-1">
+                    <div class="badge-warning" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><i data-lucide="calendar" style="width: 16px;"></i></div>
+                    <div>
+                      <div style="font-size: 0.9rem;">Session request from Priya</div>
+                      <div style="font-size: 0.75rem; color: var(--color-text-muted);">1 hour ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>User</th>
-                    <th>Type</th>
-                    <th>Payment</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>ORD-1049</td>
-                    <td>Ravi K.</td>
-                    <td>Kundali Pro</td>
-                    <td><span class="badge">Paid (Razorpay)</span></td>
-                    <td><button class="secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Resend PDF</button></td>
-                  </tr>
-                  <tr>
-                    <td>ORD-1050</td>
-                    <td>Priya M.</td>
-                    <td>Family Plan</td>
-                    <td><span class="badge" style="background: transparent; border: 1px solid var(--color-silver); color: var(--color-silver);">Failed (Stripe)</span></td>
-                    <td><button class="secondary" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">View Log</button></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Content Management View -->
-        <section id="admin-content" class="view" style="margin-top: 2rem;">
-          <h3 style="margin-bottom: 1.5rem;">Content & Legal Editor</h3>
-          <div class="card glass-panel">
-            <div class="input-group">
-              <label>Select Page to Edit</label>
-              <select>
-                <option>Privacy Policy</option>
-                <option>Terms & Conditions</option>
-                <option>Refund Policy</option>
-                <option>Disclaimer Config</option>
-              </select>
+          <!-- Users View -->
+          <section id="view-users" class="view">
+            <div class="admin-table-header">
+              <div class="flex gap-1">
+                <input type="text" placeholder="Search by name, email..." style="width: 300px;">
+                <select style="width: auto;">
+                  <option>All Roles</option>
+                  <option>User</option>
+                  <option>Family Lead</option>
+                </select>
+              </div>
+              <button><i data-lucide="plus"></i> Add New User</button>
             </div>
-            <div class="input-group">
-              <label>Content Body (HTML/Text)</label>
-              <textarea rows="10">We collect information to provide our services. Your astrology data is kept private...</textarea>
+            
+            <div class="card glass-panel" style="padding: 0;">
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Account Type</th>
+                      <th>Status</th>
+                      <th>Reports</th>
+                      <th>Joined</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="flex align-center gap-1">
+                          <div style="width: 32px; height: 32px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center;">R</div>
+                          <div>
+                            <div style="font-weight: 500;">Ravi Kumar</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-muted);">ravi@example.com</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="badge">Standard</span></td>
+                      <td><span class="badge badge-success">Active</span></td>
+                      <td>12</td>
+                      <td>10 Mar 2026</td>
+                      <td>
+                        <div class="table-actions">
+                          <button class="btn-icon secondary"><i data-lucide="eye"></i></button>
+                          <button class="btn-icon secondary"><i data-lucide="edit-2"></i></button>
+                          <button class="btn-icon secondary" style="color: var(--color-danger);"><i data-lucide="slash"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="flex align-center gap-1">
+                          <div style="width: 32px; height: 32px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center;">A</div>
+                          <div>
+                            <div style="font-weight: 500;">Anika Singh</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-muted);">anika@example.com</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="badge" style="border-color: var(--color-primary); color: var(--color-primary);">Family Lead</span></td>
+                      <td><span class="badge badge-danger">Blocked</span></td>
+                      <td>4</td>
+                      <td>05 Mar 2026</td>
+                      <td>
+                        <div class="table-actions">
+                          <button class="btn-icon secondary"><i data-lucide="eye"></i></button>
+                          <button class="btn-icon secondary"><i data-lucide="edit-2"></i></button>
+                          <button class="btn-icon secondary" style="color: var(--color-success);"><i data-lucide="check-circle"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div class="flex gap-1">
-              <button>Publish Changes</button>
-              <button class="secondary">Save as Draft</button>
-            </div>
-          </div>
-        </section>
+          </section>
 
+          <!-- Reports View -->
+          <section id="view-reports" class="view">
+            <div class="admin-table-header">
+              <div class="flex gap-1">
+                <select style="width: auto;">
+                  <option>All Types</option>
+                  <option>Horoscope</option>
+                  <option>Numerology</option>
+                  <option>Compatibility</option>
+                </select>
+                <select style="width: auto;">
+                  <option>All Status</option>
+                  <option>Pending</option>
+                  <option>Generated</option>
+                  <option>Failed</option>
+                </select>
+              </div>
+              <div class="flex gap-1">
+                <button class="secondary">Export CSV</button>
+                <button class="secondary">Download Batch</button>
+              </div>
+            </div>
+
+            <div class="card glass-panel" style="padding: 0;">
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Report ID</th>
+                      <th>User</th>
+                      <th>Type</th>
+                      <th>Plan</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="font-family: monospace;">REP-8891</td>
+                      <td>Ravi Kumar</td>
+                      <td>Horoscope (Pro)</td>
+                      <td>Monthly Plan</td>
+                      <td><span class="badge badge-success">Generated</span></td>
+                      <td>
+                        <div class="table-actions">
+                          <button class="secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Download PDF</button>
+                          <button class="secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Resend</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Plans View -->
+          <section id="view-plans" class="view">
+            <div class="flex space-between align-center" style="margin-bottom: 2rem;">
+              <h3>Membership Plans</h3>
+              <button><i data-lucide="plus"></i> Create New Plan</button>
+            </div>
+
+            <div class="grid">
+              <div class="card glass-panel">
+                <div class="flex space-between align-center" style="margin-bottom: 1.5rem;">
+                  <h4 style="margin: 0;">Standard Plan</h4>
+                  <span class="badge badge-success">Active</span>
+                </div>
+                <div style="margin-bottom: 2rem;">
+                  <div style="font-size: 1.4rem; font-weight: 700;">₹999 <span style="font-size: 0.8rem; color: var(--color-text-muted);">/ $12.99</span></div>
+                  <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.2rem;">Per month, per user</div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">
+                  • 1 Deep Horoscope / mo<br>
+                  • Priority WhatsApp support<br>
+                  • Weekly remedial guidance
+                </div>
+                <div class="flex gap-1">
+                  <button class="secondary" style="flex: 1;">Edit</button>
+                  <button class="secondary" style="flex: 1; color: var(--color-danger);">Deactivate</button>
+                </div>
+              </div>
+
+              <div class="card glass-panel">
+                <div class="flex space-between align-center" style="margin-bottom: 1.5rem;">
+                  <h4 style="margin: 0;">Family Hub</h4>
+                  <span class="badge badge-success">Active</span>
+                </div>
+                <div style="margin-bottom: 2rem;">
+                  <div style="font-size: 1.4rem; font-weight: 700;">₹2,499 <span style="font-size: 0.8rem; color: var(--color-text-muted);">/ $29.99</span></div>
+                  <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.2rem;">Up to 4 members</div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">
+                  • Everything in Standard<br>
+                  • Shared family dashboard<br>
+                  • Member limit controls
+                </div>
+                <div class="flex gap-1">
+                  <button class="secondary" style="flex: 1;">Edit</button>
+                  <button class="secondary" style="flex: 1; color: var(--color-danger);">Deactivate</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Sessions View -->
+          <section id="view-sessions" class="view">
+            <div class="admin-table-header">
+              <h3>Pending Bookings</h3>
+            </div>
+            <div class="card glass-panel" style="padding: 0;">
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Session Topic</th>
+                      <th>Requested Date</th>
+                      <th>Time Slot</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Priya Sharma</td>
+                      <td>Career Transformation</td>
+                      <td>15 Apr 2026</td>
+                      <td>11:00 AM - 12:00 PM</td>
+                      <td>
+                        <div class="table-actions">
+                          <button class="secondary badge-success" style="border: none;">Approve</button>
+                          <button class="secondary badge-danger" style="border: none;">Reject</button>
+                          <button class="secondary"><i data-lucide="more-horizontal"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Payments View -->
+          <section id="view-payments" class="view">
+            <div class="admin-table-header">
+              <div class="flex gap-1">
+                <input type="date">
+                <select style="width: auto;">
+                  <option>All Gateways</option>
+                  <option>Razorpay</option>
+                  <option>Stripe</option>
+                </select>
+                <select style="width: auto;">
+                  <option>All Currencies</option>
+                  <option>INR</option>
+                  <option>USD</option>
+                </select>
+              </div>
+            </div>
+            <div class="card glass-panel" style="padding: 0;">
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>TXN ID</th>
+                      <th>User</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="font-family: monospace;">PAY_8M029</td>
+                      <td>Rahul G.</td>
+                      <td>₹999.00</td>
+                      <td>UPI (Razorpay)</td>
+                      <td><span class="badge badge-success">Success</span></td>
+                      <td>11 Apr, 14:32</td>
+                    </tr>
+                    <tr>
+                      <td style="font-family: monospace;">PAY_9X114</td>
+                      <td>Elena M.</td>
+                      <td>$12.99</td>
+                      <td>Card (Stripe)</td>
+                      <td><span class="badge badge-danger">Failed</span></td>
+                      <td>11 Apr, 10:15</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- CMS View -->
+          <section id="view-cms" class="view">
+            <div class="editor-container">
+              <div class="editor-sidebar">
+                <div class="editor-sidebar-item active">Homepage Hero</div>
+                <div class="editor-sidebar-item">Service Descriptions</div>
+                <div class="editor-sidebar-item">Trust Lines & Footer</div>
+                <div class="editor-sidebar-item">Legal: Privacy Policy</div>
+                <div class="editor-sidebar-item">Legal: Terms</div>
+                <div class="editor-sidebar-item">Legal: Refunds</div>
+              </div>
+              <div class="editor-main">
+                <div class="card glass-panel">
+                  <div class="input-group">
+                    <label>Main Headline</label>
+                    <input type="text" value="Deepen Your Cosmic Connection">
+                  </div>
+                  <div class="input-group">
+                    <label>Subheadline</label>
+                    <textarea rows="3">Get personalized insights, remedial guidance, and mind transformation sessions powered by Vedic Astrology.</textarea>
+                  </div>
+                  <div class="input-group">
+                    <label>Trust Line Text</label>
+                    <input type="text" value="Trusted by 50,000+ Seekers Worldwide">
+                  </div>
+                  <div class="flex gap-1" style="margin-top: 2rem;">
+                    <button>Save Changes</button>
+                    <button class="secondary">Preview Site</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings View -->
+          <section id="view-settings" class="view">
+            <div class="settings-section">
+              <h3 style="margin-bottom: 2rem;">API Integrations</h3>
+              <div class="card glass-panel">
+                <div class="input-group api-key-group">
+                  <label>Vedic Astrology API Key</label>
+                  <input type="text" class="api-key-mask" value="sk_astro_9921_xzz20">
+                  <button class="btn-icon secondary" style="position: absolute; right: 5px; top: 32px;"><i data-lucide="eye"></i></button>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top: 1.5rem;">
+                   <div class="input-group">
+                    <label>Razorpay Key ID</label>
+                    <input type="text" value="rzp_live_8832X">
+                  </div>
+                   <div class="input-group">
+                    <label>Stripe Publishable Key</label>
+                    <input type="text" value="pk_live_cc821">
+                  </div>
+                </div>
+                <div class="flex-col gap-1" style="margin-top: 2rem;">
+                   <div class="input-group">
+                    <label>WhatsApp API Gateway URL</label>
+                    <input type="text" placeholder="https://api.whatsapp.com/...">
+                  </div>
+                  <div class="input-group">
+                    <label>Email (SMTP) Server</label>
+                    <input type="text" value="smtp.postmarkapp.com">
+                  </div>
+                </div>
+                <button style="margin-top: 1rem;">Update Integration Keys</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Logs View -->
+          <section id="view-logs" class="view">
+             <div class="admin-table-header">
+              <div class="flex gap-1">
+                <button class="editor-sidebar-item active">System</button>
+                <button class="editor-sidebar-item">Payments</button>
+                <button class="editor-sidebar-item">API Errors</button>
+              </div>
+              <button class="secondary badge-danger" style="border: none;">Clear All Logs</button>
+            </div>
+            
+            <div class="card glass-panel" style="background: #000; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; padding: 1.5rem; line-height: 1.4; color: #a5f3fc;">
+              <div>[2026-04-11 14:32:01] <span style="color: var(--color-success);">INFO</span>: Payment successful for TXN_8821. User: Rahul G.</div>
+              <div>[2026-04-11 14:32:05] <span style="color: var(--color-info);">DEBUG</span>: PDF Generation initiated for REP-9911</div>
+              <div>[2026-04-11 14:32:10] <span style="color: var(--color-success);">INFO</span>: Email sent successfully via Postmark to rahul@example.com</div>
+              <div>[2026-04-11 14:35:12] <span style="color: var(--color-danger);">ERROR</span>: AstroAPI timeout after 5000ms. Retrying...</div>
+              <div>[2026-04-11 14:35:15] <span style="color: var(--color-warning);">WARN</span>: High latency detected from Mumbai-1 gateway.</div>
+            </div>
+          </section>
+
+        </div>
       </main>
+    </div>
+
+    <!-- Modals (Placeholder) -->
+    <div id="admin-modal-overlay" class="modal-overlay">
+      <div class="modal-content glass-panel" id="admin-modal-body">
+        <!-- Content injected via JS -->
+      </div>
     </div>
 
     <script type="module" src="./admin.js"></script>
