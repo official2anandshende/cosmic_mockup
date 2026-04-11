@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     plansList: [],
     family: 1,
     familyList: [{ 
-      name: 'YOU', 
+      name: 'Anand', 
       relation: 'Self', 
       added: 'Account Creation',
       services: { Horoscope: false, Numerology: false, Guidance: false, Sessions: false }
@@ -154,7 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const headingPlans = document.getElementById('card-heading-plans');
     if(headingPlans) {
-      headingPlans.textContent = appState.plans > 0 ? "View My Guidance Plan" : "Guidance Plans";
+      const primaryUser = appState.familyList.find(f => f.name === 'Anand');
+      if(primaryUser && primaryUser.services.Guidance) {
+        headingPlans.textContent = "View My Guidance Plan";
+      } else if(appState.isSubscribedToReports) {
+        headingPlans.textContent = "Create Guidance Plan";
+      } else {
+        headingPlans.textContent = "Guidance Plans";
+      }
     }
 
     if(appState.activeFamilyMember === null) {
@@ -198,6 +205,22 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         remindersList.innerHTML = appState.reminders.map(r => `
           <li style="margin-bottom: 1rem;">🔔 <strong style="color: white;">${r.title}</strong><br><span style="font-size: 0.8rem;">${r.desc}</span></li>
+        `).join('');
+      }
+    }
+    const bookingList = document.getElementById('booking-status-list');
+    if(bookingList) {
+      if(appState.sessionsList.length === 0) {
+        bookingList.innerHTML = '<li style="color:var(--color-text-muted); font-size:0.9rem;">No sessions requested.</li>';
+      } else {
+        bookingList.innerHTML = appState.sessionsList.map(s => `
+          <li style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div class="flex space-between align-center" style="margin-bottom: 0.5rem;">
+              <strong>${s.title}</strong>
+              <span class="badge" style="background: ${s.status === 'Upcoming' ? 'rgba(250, 204, 21, 0.1)' : 'rgba(26,176,230,0.1)'}; color: ${s.status === 'Upcoming' ? '#f43f5e' : 'var(--color-primary)'};">${s.status}</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted);">Scheduled for ${s.date}</p>
+          </li>
         `).join('');
       }
     }
@@ -298,6 +321,22 @@ document.addEventListener('DOMContentLoaded', () => {
           } else if(viewType === 'sessions') {
             switchView('view-session-booking');
           }
+        } else {
+          // Gated logic for Guidance Plan
+          if(viewType === 'guidance') {
+            if(!appState.isSubscribedToReports) {
+              // First select a plan
+              switchView('view-subscription-plans');
+            } else {
+              // Already subscribed, but form not filled (isActive is false)
+              const gNameInput = document.getElementById('g-name');
+              if(gNameInput) gNameInput.value = name;
+              switchView('view-guidance-intake-form');
+            }
+          } else if(viewType === 'pdf') {
+             // Go to manual generation hub
+             switchView('view-family-member-dashboard');
+          }
         }
       });
     });
@@ -340,9 +379,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flex gap-1" style="flex-wrap: wrap;">
           ${s.Horoscope ? `<button class="btn-list-family-service" data-active="true" data-name="${f.name}" data-view="pdf" data-type="Horoscope" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: rgba(26,176,230,0.1); border: 1px solid var(--color-primary); color: #fff; border-radius: 6px; cursor: pointer;">View Kundali</button>` : ''}
           ${s.Numerology ? `<button class="btn-list-family-service" data-active="true" data-name="${f.name}" data-view="pdf" data-type="Numerology" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: rgba(26,176,230,0.1); border: 1px solid var(--color-primary); color: #fff; border-radius: 6px; cursor: pointer;">View Numerology</button>` : ''}
-          ${s.Guidance ? `<button class="btn-list-family-service" data-active="true" data-name="${f.name}" data-view="guidance" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: rgba(250,204,21,0.1); border: 1px solid #facc15; color: #fff; border-radius: 6px; cursor: pointer;">View Guidance</button>` : ''}
+          <button class="btn-list-family-service" data-active="${s.Guidance}" data-name="${f.name}" data-view="guidance" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: ${s.Guidance ? 'rgba(250,204,21,0.1)' : 'transparent'}; border: 1px solid ${s.Guidance ? '#facc15' : 'rgba(255,255,255,0.2)'}; color: #fff; border-radius: 6px; cursor: pointer;">${s.Guidance ? 'View Guidance Plan' : 'Create Guidance Plan'}</button>
           ${s.Sessions ? `<button class="btn-list-family-service" data-active="true" data-name="${f.name}" data-view="sessions" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: rgba(100,255,218,0.1); border: 1px solid var(--color-accent); color: #fff; border-radius: 6px; cursor: pointer;">View Sessions</button>` : ''}
-          ${!s.Horoscope && !s.Numerology && !s.Guidance && !s.Sessions ? '<p style="color:var(--color-text-muted); font-size:0.85rem;">No services active. Open dashboard to generate.</p>' : ''}
         </div>
       </li>
     `}),
@@ -398,8 +436,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const cardGuidancePlans = document.getElementById('card-guidance-plans');
   if(cardGuidancePlans) {
     cardGuidancePlans.addEventListener('click', () => {
-      if(appState.plans > 0) {
+      const primaryUser = appState.familyList.find(f => f.name === 'Anand');
+      appState.activeFamilyMember = 'Anand'; // Default context to Primary User
+      
+      if(primaryUser && primaryUser.services.Guidance) {
         switchView('view-active-guidance-plan');
+      } else if(appState.isSubscribedToReports) {
+        switchView('view-guidance-intake-form');
       } else {
         switchView('view-subscription-plans');
       }
@@ -434,8 +477,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Activate service for the family member
-    if(appState.activeFamilyMember) {
-       const member = appState.familyList.find(m => m.name === appState.activeFamilyMember);
+    const memberName = appState.activeFamilyMember || userName;
+    if(memberName) {
+       const member = appState.familyList.find(m => m.name.toLowerCase() === memberName.toLowerCase());
        if(member && member.services) {
          member.services[appState.pendingReportType] = true;
        }
@@ -532,19 +576,30 @@ document.addEventListener('DOMContentLoaded', () => {
         appState.plansList.push({ title: planName, date: todayStr });
         appState.reminders.unshift({ title: 'Plan Activated', desc: `Your new ${planName} guidance plan is active.` });
 
-        // Activate service for the family member if redirected from their profile
-        if(appState.activeFamilyMember) {
-          const member = appState.familyList.find(m => m.name === appState.activeFamilyMember);
-          if(member && member.services) {
-            member.services.Guidance = true;
-          }
-        }
-
         renderState();
         switchView('view-home');
       });
     }
   });
+
+  const guidanceIntakeForm = document.getElementById('guidance-intake-form');
+  if(guidanceIntakeForm) {
+    guidanceIntakeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Activate Guidance for set member
+      if(appState.activeFamilyMember) {
+        const member = appState.familyList.find(m => m.name === appState.activeFamilyMember);
+        if(member && member.services) {
+          member.services.Guidance = true;
+          appState.reminders.unshift({ title: 'Guidance Plan Created', desc: `Personalized roadmap for ${member.name} is ready.` });
+        }
+      }
+
+      renderState();
+      switchView('view-active-guidance-plan');
+    });
+  }
 
   const btnAddFamily = document.getElementById('btn-add-family');
   const addFamilyModal = document.getElementById('add-family-modal');
