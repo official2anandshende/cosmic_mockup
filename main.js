@@ -1,4 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // ========== STATE MANAGEMENT ==========
+  const appState = {
+    pendingReportType: 'Horoscope',
+    isSubscribedToReports: false,
+    subscribedReportPlan: 'Plan1',
+    reports: 0,
+    plans: 0,
+    plansList: [],
+    family: 1,
+    familyList: [{ 
+      name: 'Anand', 
+      relation: 'Self', 
+      added: 'Account Creation',
+      services: { Horoscope: false, Numerology: false, Guidance: false, Sessions: false }
+    }],
+    sessionsUpcoming: 0,
+    sessionsPast: 0,
+    sessionsList: [],
+    recentReports: [],
+    reminders: [],
+    activeFamilyMember: null,
+    currentView: 'view-home',
+    viewHistory: []
+  };
+
+  const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
   // Navigation handling
   const navLinks = document.querySelectorAll('.nav-link');
   const views = document.querySelectorAll('.view');
@@ -50,96 +77,99 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Modal Handling
+  // Auth State
+  const userData = JSON.parse(sessionStorage.getItem('cosmic_user'));
+  let isLoggedIn = userData && userData.isLoggedIn;
+  
+  // Initialize UI based on auth
   const loginModal = document.getElementById('login-modal');
   const loginTriggers = document.querySelectorAll('.btn-login-trigger, #btn-login-trigger');
   const loginForm = document.getElementById('login-form');
   const loginError = document.getElementById('login-error');
-  
-  // Auth State
-  let isLoggedIn = false;
-  
-  // Force login directly (index.html has it active by default)
-  loginModal.classList.add('active');
+  const loginHeaderBtn = document.getElementById('btn-login-trigger');
+  const userProfile = document.getElementById('user-profile');
+
+  if (!isLoggedIn) {
+      // If not logged in on dashboard, redirect to landing
+      if (window.location.pathname.includes('dashboard.html')) {
+          window.location.href = 'index.html';
+      }
+  } else {
+      if (loginModal) loginModal.classList.remove('active');
+      if (loginHeaderBtn) loginHeaderBtn.style.display = 'none';
+      if (userProfile) {
+          userProfile.style.display = 'flex';
+          const welcomeMsg = userProfile.querySelector('.badge');
+          if (welcomeMsg) welcomeMsg.textContent = `Welcome, ${userData.name}`;
+      }
+      // Ensure the initial view is visible
+      switchView(appState.currentView);
+  }
 
   loginTriggers.forEach(btn => {
     btn.addEventListener('click', () => {
       if(!isLoggedIn) {
-        loginModal.classList.add('active');
-        loginError.style.display = 'none';
+          window.location.href = 'index.html';
       } else {
         switchView('view-home');
       }
     });
   });
 
-  // Hardcoded UI Login Logic
-  loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
+  // Handle Internal Dashboard Login (if somehow reached)
+  if (loginForm) {
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username')?.value || '';
+        const password = document.getElementById('password')?.value || '';
 
-    if(u.toLowerCase() === 'anand' && p === 'Password@123') {
-      // Success
+        // Check sessionStorage for dynamic user data by username
+        const storedUser = JSON.parse(sessionStorage.getItem(`user_${username}`));
+
+        if(storedUser && storedUser.password === password) {
+          handleLoginSuccess(storedUser.name, username);
+        } else {
+          loginError.style.display = 'block';
+        }
+      });
+  }
+
+  function handleLoginSuccess(name, email) {
       isLoggedIn = true;
-      loginModal.classList.remove('active');
-      loginForm.reset();
+      sessionStorage.setItem('cosmic_user', JSON.stringify({ name, email, isLoggedIn: true }));
+      
+      if (loginModal) loginModal.classList.remove('active');
+      if (loginForm) loginForm.reset();
       
       // Update UI
-      document.getElementById('btn-login-trigger').style.display = 'none';
-      document.getElementById('user-profile').style.display = 'flex';
+      if (loginHeaderBtn) loginHeaderBtn.style.display = 'none';
+      if (userProfile) {
+          userProfile.style.display = 'flex';
+          const welcomeMsg = userProfile.querySelector('.badge');
+          if (welcomeMsg) welcomeMsg.textContent = `Welcome, ${name}`;
+      }
       
       const authReqLinks = document.querySelectorAll('.auth-req');
       authReqLinks.forEach(l => l.style.display = 'inline');
 
-      // Change button texts on cards to "Purchase" since user is logged in
       document.querySelectorAll('.btn-login-trigger').forEach(btn => btn.textContent = 'Purchase Plan');
 
-      // Go to subscription plans
+      // Update app state name if needed
+      const selfMember = appState.familyList.find(f => f.relation === 'Self');
+      if (selfMember) selfMember.name = name;
+
       switchView('view-subscription-plans');
-    } else {
-      loginError.style.display = 'block';
-    }
-  });
+  }
 
-  document.getElementById('btn-logout').addEventListener('click', () => {
-    isLoggedIn = false;
-    document.getElementById('btn-login-trigger').style.display = 'inline-block';
-    document.getElementById('user-profile').style.display = 'none';
-    
-    // Empty the views
-    views.forEach(v => v.classList.remove('active'));
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        isLoggedIn = false;
+        sessionStorage.removeItem('cosmic_user');
+        window.location.href = 'index.html';
+      });
+  }
 
-    // Just show modal
-    loginModal.classList.add('active'); // force login again
-  });
-
-  // ========== STATE MANAGEMENT ==========
-  const appState = {
-    pendingReportType: 'Horoscope',
-    isSubscribedToReports: false,
-    subscribedReportPlan: 'Plan1',
-    reports: 0,
-    plans: 0,
-    plansList: [],
-    family: 1,
-    familyList: [{ 
-      name: 'Anand', 
-      relation: 'Self', 
-      added: 'Account Creation',
-      services: { Horoscope: false, Numerology: false, Guidance: false, Sessions: false }
-    }],
-    sessionsUpcoming: 0,
-    sessionsPast: 0,
-    sessionsList: [],
-    recentReports: [],
-    reminders: [],
-    activeFamilyMember: null,
-    viewHistory: [],
-    currentView: 'view-home'
-  };
-
-  const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
   function renderState() {
     const elReports = document.getElementById('metric-reports');
