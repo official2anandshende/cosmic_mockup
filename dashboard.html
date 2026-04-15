@@ -150,25 +150,60 @@
           <input type="text" id="report-user-name" placeholder="Enter full name">
         </div>
         <div class="input-group">
-          <label>DOB</label>
-          <input type="date">
+          <label>Gender <span style="color: #f43f5e;">*</span></label>
+          <select id="report-gender">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Date of Birth (dd/mm/yyyy) <span style="color: #f43f5e;">*</span></label>
+          <input type="text" id="report-dob" placeholder="dd/mm/yyyy">
         </div>
         <div class="flex gap-1">
           <div class="input-group" style="flex: 1;">
-            <label>Time of Birth</label>
-            <input type="time">
+            <label>Time of Birth <span style="color: #f43f5e;">*</span></label>
+            <input type="time" id="report-tob">
           </div>
           <div class="input-group" style="flex: 1;">
-            <label>Country</label>
-            <select>
-              <option>India</option>
-              <option>USA</option>
+            <label>Timezone Offset <span style="color: #f43f5e;">*</span></label>
+            <input type="number" id="report-tzone" step="0.5" placeholder="-5">
+          </div>
+        </div>
+        <div class="flex gap-1">
+          <div class="input-group" style="flex: 1;">
+            <label>Language</label>
+            <select id="report-language">
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 1;">
+            <label>Chart Style</label>
+            <select id="report-chart-style">
+              <option value="NORTH_INDIAN">North Indian</option>
+              <option value="SOUTH_INDIAN">South Indian</option>
+              <option value="EAST_INDIAN">East Indian</option>
             </select>
           </div>
         </div>
         <div class="input-group">
-          <label>Place of Birth</label>
-          <input type="text" placeholder="City, State">
+          <label>Place of Birth <span style="color: #f43f5e;">*</span></label>
+          <input type="text" id="report-place" placeholder="City, State, Country">
+        </div>
+        <div class="flex gap-1">
+          <div class="input-group" style="flex: 1;">
+            <label>Latitude</label>
+            <input type="number" id="report-lat" step="0.0001" placeholder="39.9526">
+          </div>
+          <div class="input-group" style="flex: 1;">
+            <label>Longitude</label>
+            <input type="number" id="report-lon" step="0.0001" placeholder="-75.1652">
+          </div>
         </div>
 
         <div id="price-notice"
@@ -332,7 +367,7 @@
 
       <div class="card glass-panel" style="max-width: 800px; margin: 0 auto;">
           <p style="color: var(--color-text-muted); margin-bottom: 2rem;">Please provide details for your tailored 30-day roadmap.</p>
-          
+
           <form id="guidance-intake-form">
             <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
               <div class="input-group">

@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     plans: 0,
     plansList: [],
     family: 1,
-    familyList: [{ 
-      name: 'Anand', 
-      relation: 'Self', 
+    familyList: [{
+      name: 'Anand',
+      relation: 'Self',
       added: 'Account Creation',
       services: { Horoscope: false, Numerology: false, Guidance: false, Sessions: false }
     }],
@@ -29,27 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navigation handling
   const navLinks = document.querySelectorAll('.nav-link');
   const views = document.querySelectorAll('.view');
-  
+
   function switchView(targetId, isBackAction = false) {
     if(!isBackAction && appState.currentView !== targetId) {
       appState.viewHistory.push(appState.currentView);
     }
-    
+
     appState.currentView = targetId;
 
     views.forEach(v => v.classList.remove('active'));
     navLinks.forEach(n => n.classList.remove('active'));
-    
+
     const targetEl = document.getElementById(targetId);
     if(targetEl) targetEl.classList.add('active');
-    
+
     document.querySelectorAll(`.nav-link[data-target="${targetId}"]`).forEach(n => n.classList.add('active'));
 
     if(targetId === 'view-home') {
       appState.activeFamilyMember = null;
       appState.viewHistory = []; // Reset on home
     }
-    
+
     renderState();
   }
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auth State
   const userData = JSON.parse(sessionStorage.getItem('cosmic_user'));
   let isLoggedIn = userData && userData.isLoggedIn;
-  
+
   // Initialize UI based on auth
   const loginModal = document.getElementById('login-modal');
   const loginTriggers = document.querySelectorAll('.btn-login-trigger, #btn-login-trigger');
@@ -137,10 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleLoginSuccess(name, email) {
       isLoggedIn = true;
       sessionStorage.setItem('cosmic_user', JSON.stringify({ name, email, isLoggedIn: true }));
-      
+
       if (loginModal) loginModal.classList.remove('active');
       if (loginForm) loginForm.reset();
-      
+
       // Update UI
       if (loginHeaderBtn) loginHeaderBtn.style.display = 'none';
       if (userProfile) {
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const welcomeMsg = userProfile.querySelector('.badge');
           if (welcomeMsg) welcomeMsg.textContent = `Welcome, ${name}`;
       }
-      
+
       const authReqLinks = document.querySelectorAll('.auth-req');
       authReqLinks.forEach(l => l.style.display = 'inline');
 
@@ -254,14 +254,14 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
       }
     }
-    
+
     renderFamilyMembers();
   }
 
   function renderFamilyMembers() {
     const container = document.getElementById('family-members-container');
     if (!container) return;
-    
+
     if (appState.familyList.length === 0) {
       container.innerHTML = '<p style="color:var(--color-text-muted);">No family members added yet.</p>';
       return;
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `).join('');
-    
+
     container.querySelectorAll('.family-member-link, .btn-family-dashboard-trigger').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const name = e.currentTarget.getAttribute('data-name');
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openMetricsList(title, dataArray, renderFn) {
     const listTitle = document.getElementById('metrics-list-title');
     if(listTitle) listTitle.textContent = title;
-    
+
     const container = document.getElementById('metrics-list-container');
     if (container) {
       if (!dataArray || dataArray.length === 0) {
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = dataArray.map(renderFn).join('');
       }
     }
-    
+
     // Attach dynamic report view handlers
     document.querySelectorAll('.btn-list-view-report').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -336,9 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = e.currentTarget.getAttribute('data-type');
         const viewType = e.currentTarget.getAttribute('data-view');
         const isActive = e.currentTarget.getAttribute('data-active') === 'true';
-        
+
         appState.activeFamilyMember = name;
-        
+
         if(isActive) {
           if(viewType === 'pdf') {
             const pdfPath = type === 'Horoscope' ? '/reports/Horoscope_Plan1.pdf' : '/reports/Numerology_Plan1.pdf';
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <button class="secondary btn-family-dashboard-trigger" data-name="${f.name}" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Manage Dashboard</button>
         </div>
-        
+
         <div class="flex gap-1" style="flex-wrap: wrap;">
           ${s.Horoscope ? `<button class="btn-list-family-service" data-active="true" data-name="${f.name}" data-view="pdf" data-type="Horoscope" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: rgba(26,176,230,0.1); border: 1px solid var(--color-primary); color: #fff; border-radius: 6px; cursor: pointer;">View Kundali</button>` : ''}
           ${s.Numerology ? `<button class="btn-list-family-service" data-active="true" data-name="${f.name}" data-view="pdf" data-type="Numerology" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: rgba(26,176,230,0.1); border: 1px solid var(--color-primary); color: #fff; border-radius: 6px; cursor: pointer;">View Numerology</button>` : ''}
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cardGuidancePlans.addEventListener('click', () => {
       const primaryUser = appState.familyList.find(f => f.name === 'Anand');
       appState.activeFamilyMember = 'Anand'; // Default context to Primary User
-      
+
       if(primaryUser && primaryUser.services.Guidance) {
         switchView('view-active-guidance-plan');
       } else if(appState.isSubscribedToReports) {
@@ -483,23 +483,134 @@ document.addEventListener('DOMContentLoaded', () => {
   const otpInput = document.getElementById('otp-input');
   const otpError = document.getElementById('otp-error');
   const reportUserNameInput = document.getElementById('report-user-name');
+  const reportGenderInput = document.getElementById('report-gender');
+  const reportDobInput = document.getElementById('report-dob');
+  const reportTobInput = document.getElementById('report-tob');
+  const reportTzoneInput = document.getElementById('report-tzone');
+  const reportLanguageInput = document.getElementById('report-language');
+  const reportChartStyleInput = document.getElementById('report-chart-style');
+  const reportPlaceInput = document.getElementById('report-place');
+  const reportLatInput = document.getElementById('report-lat');
+  const reportLonInput = document.getElementById('report-lon');
+
+  function parseDobValue(value) {
+    const raw = String(value || '').trim();
+    if (!raw) {
+      return [null, null, null];
+    }
+
+    if (raw.includes('/')) {
+      const parts = raw.split('/').map(part => part.trim());
+      if (parts.length === 3) {
+        const [day, month, year] = parts;
+        return [year, month, day];
+      }
+    }
+
+    if (raw.includes('-')) {
+      const parts = raw.split('-').map(part => part.trim());
+      if (parts.length === 3) {
+        return [parts[0], parts[1], parts[2]];
+      }
+    }
+
+    return [null, null, null];
+  }
+
+  function getReportPayload() {
+    const [year, month, day] = parseDobValue(reportDobInput?.value);
+    const [hour, min] = reportTobInput?.value.split(':') || [];
+    return {
+      name: reportUserNameInput?.value.trim() || '',
+      gender: reportGenderInput?.value || '',
+      day: day ? parseInt(day, 10) : null,
+      month: month ? parseInt(month, 10) : null,
+      year: year ? parseInt(year, 10) : null,
+      hour: hour ? parseInt(hour, 10) : null,
+      min: min ? parseInt(min, 10) : null,
+      lat: reportLatInput?.value ? parseFloat(reportLatInput.value) : null,
+      lon: reportLonInput?.value ? parseFloat(reportLonInput.value) : null,
+      language: reportLanguageInput?.value || 'en',
+      tzone: reportTzoneInput?.value ? parseFloat(reportTzoneInput.value) : null,
+      place: reportPlaceInput?.value.trim() || '',
+      chart_style: reportChartStyleInput?.value || 'NORTH_INDIAN'
+    };
+  }
+
+  async function createHoroscopeReport(reportPayload) {
+    const response = await fetch('/api/horoscope', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(reportPayload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      const message = errorData?.error || `Unable to generate horoscope: ${response.status}`;
+      throw new Error(message);
+    }
+
+    return await response.json();
+  }
 
   function validateReportForm() {
     if(!reportUserNameInput || !reportUserNameInput.value.trim()) {
       alert("Please enter a Name for the report.");
       return false;
     }
+    if(!reportGenderInput || !reportGenderInput.value) {
+      alert("Please select a Gender.");
+      return false;
+    }
+    if(!reportDobInput || !reportDobInput.value) {
+      alert("Please enter Date of Birth in dd/mm/yyyy format.");
+      return false;
+    }
+    const [year, month, day] = parseDobValue(reportDobInput.value);
+    if (!year || !month || !day) {
+      alert("Please enter Date of Birth in dd/mm/yyyy format.");
+      return false;
+    }
+    if(!reportTobInput || !reportTobInput.value) {
+      alert("Please enter Time of Birth.");
+      return false;
+    }
+    if(!reportTzoneInput || !reportTzoneInput.value.trim()) {
+      alert("Please enter a Timezone offset.");
+      return false;
+    }
+    if(!reportPlaceInput || !reportPlaceInput.value.trim()) {
+      alert("Please enter Place of Birth.");
+      return false;
+    }
     return true;
   }
 
-  function processReportPurchase() {
+async function processReportPurchase() {
     const planVal = appState.isSubscribedToReports ? appState.subscribedReportPlan : (document.getElementById('k-plan-2').checked ? 'Plan2' : 'Plan1');
-    const userName = reportUserNameInput.value.trim();
-    
+    const reportPayload = getReportPayload();
+    const userName = reportPayload.name;
+    console.log('Horoscope API request payload:', reportPayload);
+    appState.lastHoroscopeRequest = reportPayload;
+
+    let generatedReportUrl;
+    try {
+      const result = await createHoroscopeReport(reportPayload);
+      generatedReportUrl = result?.fileUrl;
+      if (!generatedReportUrl) {
+        throw new Error('Invalid report response from backend.');
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to generate horoscope report.');
+      return;
+    }
+
     const now = new Date();
     const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     const timestampStr = `${todayStr} ${timeStr}`;
-    
+
     if (!appState.isSubscribedToReports) {
       appState.isSubscribedToReports = true;
       appState.subscribedReportPlan = planVal;
@@ -516,18 +627,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const rTitle = `${appState.pendingReportType} - ${userName}`;
-    const rPdf = `/reports/${appState.pendingReportType}_${planVal}.pdf`;
-    
+    const rPdf = generatedReportUrl;
+
     appState.reports++;
     appState.recentReports.unshift({ title: rTitle, date: timestampStr, pdf: rPdf });
     renderState();
 
     const rTitleEl = document.getElementById('report-result-title');
     if (rTitleEl) rTitleEl.textContent = rTitle;
-    
+
     const rDateEl = document.getElementById('report-result-date');
     if (rDateEl) rDateEl.textContent = timestampStr;
-    
+
     const rDownEl = document.getElementById('report-result-download');
     if (rDownEl) rDownEl.href = rPdf;
 
@@ -575,7 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pdfModal = document.getElementById('pdf-modal');
   const btnClosePdf = document.getElementById('btn-close-pdf');
   const pdfIframe = document.getElementById('pdf-viewer-iframe');
-  
+
   if (btnViewReport) {
     btnViewReport.addEventListener('click', () => {
       const pdfPath = document.getElementById('report-result-download').href;
@@ -583,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(pdfModal) pdfModal.classList.add('active');
     });
   }
-  
+
   if (btnClosePdf) {
     btnClosePdf.addEventListener('click', () => {
       if(pdfModal) pdfModal.classList.remove('active');
@@ -602,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
         appState.plans++;
         appState.isSubscribedToReports = true;
         appState.subscribedReportPlan = idx === 0 ? "Plan1" : "Plan2";
-        
+
         appState.plansList.push({ title: planName, date: todayStr });
         appState.reminders.unshift({ title: 'Plan Activated', desc: `Your new ${planName} guidance plan is active.` });
 
@@ -616,7 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if(guidanceIntakeForm) {
     guidanceIntakeForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
       // Activate Guidance for set member
       if(appState.activeFamilyMember) {
         const member = appState.familyList.find(m => m.name === appState.activeFamilyMember);
@@ -636,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const newFamilyName = document.getElementById('new-family-name');
   const newFamilyRelation = document.getElementById('new-family-relation');
   const addFamilyError = document.getElementById('add-family-error');
-  
+
   if(btnAddFamily) {
     btnAddFamily.addEventListener('click', () => {
       if(addFamilyModal) addFamilyModal.classList.add('active');
@@ -653,16 +764,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       addFamilyError.style.display = 'none';
       const relation = newFamilyRelation.value || 'Other';
-      
+
       appState.family++;
-      appState.familyList.push({ 
-        name: newName, 
-        relation: relation, 
+      appState.familyList.push({
+        name: newName,
+        relation: relation,
         added: 'Just now',
         services: { Horoscope: false, Numerology: false, Guidance: false, Sessions: false }
       });
       renderState();
-      
+
       addFamilyModal.classList.remove('active');
       if(newFamilyName) newFamilyName.value = '';
       if(newFamilyRelation) newFamilyRelation.value = 'Spouse';
